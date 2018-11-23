@@ -31,9 +31,18 @@ class Args implements \ArrayAccess
         }
     }
 
-    public static function setConfig($config)
+    public static function setConfig($config, $value = null)
     {
-        self::$configs = $config;
+        if (is_array($config))
+            self::$configs = array_merge(self::$configs, $config);
+        else if (is_string($config)) {
+            self::$configs[$config] = $value;
+        }
+    }
+
+    public static function setValue($config, $value = null)
+    {
+        self::setConfig($config, $value);
     }
 
     public static function setKeysForArgValues($keys)

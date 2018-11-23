@@ -18,15 +18,20 @@ class App
 
     private $init_fun = [];
 
+    public static function getAppRoot()
+    {
+        return pathinfo($_SERVER["PHP_SELF"], PATHINFO_DIRNAME);
+    }
+
     public function __construct($configOrFilePath = null)
     {
 
-       // var_dump($_SERVER);
-        $root_path = pathinfo($_SERVER["SCRIPT_FILENAME"],PATHINFO_DIRNAME);
+        // var_dump($_SERVER);
+        $root_path = App::getAppRoot();
 
-        if (file_exists($config_file = $root_path."/config.json")) {
+        if (file_exists($config_file = $root_path . "/config.json")) {
             $config = json_decode(file_get_contents($config_file), true);
-        } else if (file_exists($config_file =   $root_path."/../config.json")) {
+        } else if (file_exists($config_file = $root_path . "/../config.json")) {
             $config = json_decode(file_get_contents($config_file), true);
         } else if (is_array($configOrFilePath)) {
             $config = $configOrFilePath;
@@ -34,7 +39,6 @@ class App
             $config = json_decode(file_get_contents($configOrFilePath), true);
         } else
             $config = [];
-
 
 
         Args::setConfig($config);
@@ -102,7 +106,7 @@ class App
         return null;
     }
 
-    private function beforRun($app=null)
+    private function beforRun($app = null)
     {
 
         if ($app instanceof IArgsKeys) {
