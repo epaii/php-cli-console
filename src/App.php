@@ -92,7 +92,8 @@ class App
             } else if (isset($options["app"])) {
                 $app = $options["app"];
             } else {
-                return null;
+                $app = "index";
+
             }
             if ($app) {
                 $config = $this->args->getConfigVal("app");
