@@ -14,9 +14,19 @@ use epii\cli\i\IRun;
  */
 class App
 {
+
     private $args = null;
 
     private $init_fun = [];
+
+
+    private $base_namespace = "app";
+
+    public function setBaseNameSpace($base_name)
+    {
+        $this->base_namespace = $base_name;
+        return $this;
+    }
 
     public static function getAppRoot()
     {
@@ -72,7 +82,10 @@ class App
 
     public function run($app = null)
     {
+
+
         if ($app === null) {
+
             $options = getopt("a:", ["app:"], $int);
             if (isset($options["a"])) {
                 $app = $options["a"];
@@ -86,17 +99,38 @@ class App
 
                 if (isset($config[$app])) {
                     $app = $config[$app];
+                } else {
+                    $app = str_replace(".", "\\", $app);
                 }
+            }
+
+
+        }
+
+        $m = "index";
+
+        if (is_string($app)) {
+            if (stripos($app, "@") > 0) {
+
+                list($app, $m) = explode("@", $app);
             }
         }
 
 
-        if (class_exists($app)) {
+        if (is_string($app) && (class_exists($app) || class_exists($app = $this->base_namespace . "\\" . $app))) {
             $run = new $app();
             $this->beforRun($run);
-            if ($run instanceof IRun) {
-
-                return $run->run($this->args);
+            if (method_exists($run, "init")) {
+                $run->init($this->args);
+            }
+            if (method_exists($run, $m)) {
+                $run->$m($this->args);
+            } else {
+                if ($run instanceof IRun) {
+                    return $run->run($this->args);
+                } elseif (method_exists($run, "__call")) {
+                    $run->$m();
+                }
             }
         } else {
             $this->beforRun();
@@ -104,6 +138,8 @@ class App
         }
 
         return null;
+
+
     }
 
     private function beforRun($app = null)
@@ -113,7 +149,6 @@ class App
             Args::setKeysForArgValues($app->keysForArgValues());
 
         }
-
 
         array_map(function ($irun) {
 
